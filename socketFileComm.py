@@ -8,26 +8,24 @@ def getFileData(dataDirectory, fileName):
     
 def getFileSize(dataDirectory, fileName):
     fileSize = os.path.getsize(os.path.join(dataDirectory, fileName))
-    return str(fileSize).encode()
+    return fileSize
 
 def isFileExists(fileName):
     return os.path.exists(os.path.join(dataDirectory, fileName))
 
 def recvFileData(clientSocket, fileSize):
-    print("fileData receiving")
-    
     fileData = b""
     while True: # receive all data
         part = clientSocket.recv(int(fileSize))
         fileData += part
                 
-        print(len(part), len(fileData))
+        #print(len(part), len(fileData))
         if len(fileData) == int(fileSize): # last data
             break
 
     return fileData
     
-def fileUpload(dataDirectory, fileName, fileData):    
+def writeFile(dataDirectory, fileName, fileData):    
     with open(os.path.join(dataDirectory, fileName), "wb+") as file: # file Open with byte write        
         file.write(fileData) # write file
         

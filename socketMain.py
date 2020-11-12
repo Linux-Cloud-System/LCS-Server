@@ -7,7 +7,7 @@ serverHost = ""
 subHost = ["127.0.0.1", "127.0.0.1", "127.0.0.1"]
 Port = 3333
 tempPort = [3334, 3335, 3336]
-dataDirectory = "/home/pi/Desktop/Data" # data directory
+dataDirectory = "/home/pi/Desktop/data/Data" # data directory
                 
 def fileUpdate():
     print("is it possible?")
@@ -26,6 +26,7 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as serverSocket:
         
         request = clientSocket.recv(512).decode() # download, upload, delete, update
         clientSocket.sendall("ok".encode()) # send "ok"
+        print(request)
         
         if request == "upload":
             fileSize = clientSocket.recv(512).decode() # recieve fileSize
@@ -38,25 +39,48 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as serverSocket:
             
             fileData = fileComm.splitFile(fileData) # split file
             
-            fileComm.fileUpload(dataDirectory, fileName, fileData[0])
+            fileComm.writeFile(dataDirectory, fileName, fileData[0])
             
             for i in range(2, 5):
                 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as subSocket:
                     subSocket.connect((subHost[i-2], tempPort[i-2]))
                     
-                    subSocket.sendall("upload".encode())
+                    subSocket.sendall("upload".encode()) # send "upload"
                     
-                    subSocket.recv(2)
-                    subSocket.sendall(str(len(fileData[i-1])).encode())
+                    subSocket.recv(2) # receive "ok" == server is ready to receive next data
+                    subSocket.sendall(str(len(fileData[i-1])).encode()) # send fileSize
+                    
+                    subSocket.recv(2) # receive "ok"
+                    subSocket.sendall(fileName.encode()) # send fileName
+                    
+                    subSocket.recv(2) # receive "ok"
+                    subSocket.sendall(fileData[i-1]) # send fileData
+            
+        elif request == "download":
+            fileName = clientSocket.recv(512).decode() # recieve fileName
+            
+            fileSize = fileComm.getFileSize(dataDirectory, fileName)            
+            fileData = fileComm.getFileData(dataDirectory, fileName)
+            
+            for i in range(2, 5):
+                with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as subSocket:
+                    subSocket.connect((subHost[i-2], tempPort[i-2]))
+            
+                    subSocket.sendall("download".encode())
                     
                     subSocket.recv(2)
                     subSocket.sendall(fileName.encode())
                     
-                    subSocket.recv(2)
-                    subSocket.sendall(fileData[i-1])
+                    fileSize = subSocket.recv(512).decode()
+                    subSocket.sendall("ok".encode()) # send "ok"
+                    
+                    fileData += fileComm.recvFileData(subSocket, fileSize)
             
-        elif request == "download":
-            fileDownload()
+            clientSocket.sendall(str(len(fileData)).encode())
+            
+            clientSocket.recv(2)
+            clientSocket.sendall(fileData)
+                    
         elif request == "delete":
             fileDelete()
         elif request == "update":
