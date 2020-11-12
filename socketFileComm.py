@@ -21,6 +21,7 @@ def recvFileData(clientSocket, fileSize):
         part = clientSocket.recv(int(fileSize))
         fileData += part
                 
+        print(len(part), len(fileData))
         if len(fileData) == int(fileSize): # last data
             break
 
@@ -32,4 +33,16 @@ def fileUpload(dataDirectory, fileName, fileData):
         
 def splitFile(fileData):
     n = math.ceil(len(fileData)/4)
-    return [fileData[i:i+n] for i in range(0, len(fileData), n)]
+    result = [fileData[i:i+n] for i in range(0, len(fileData), n)]
+    if len(result) != 4:
+        for i in range(len(result), 4):
+            result[i] = b""
+    return result
+
+def fileDelete():
+    fileName = fileComm.recvFileName()
+    
+    if fileComm.isFileExists(fileName):
+        os.remove(os.path.join(dataDirectory, fileName))
+    else:
+        clientsocket.sendall("There is no file " + fileName)

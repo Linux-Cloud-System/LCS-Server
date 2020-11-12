@@ -8,23 +8,7 @@ subHost = ["127.0.0.1", "127.0.0.1", "127.0.0.1"]
 Port = 3333
 tempPort = [3334, 3335, 3336]
 dataDirectory = "/home/pi/Desktop/Data" # data directory
-        
-def fileDownload():
-    fileName = fileComm.recvFileName()
-    
-    if fileComm.isFileExists(fileName):
-        clientSocket.sendall(getFileData(fileName))
-    else:
-        clientSocket.sendall("There is no file " + fileName)
-        
-def fileDelete():
-    fileName = fileComm.recvFileName()
-    
-    if fileComm.isFileExists(fileName):
-        os.remove(os.path.join(dataDirectory, fileName))
-    else:
-        clientsocket.sendall("There is no file " + fileName)
-        
+                
 def fileUpdate():
     print("is it possible?")
     
@@ -56,7 +40,7 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as serverSocket:
             
             fileComm.fileUpload(dataDirectory, fileName, fileData[0])
             
-            for i in range(2, 5): 
+            for i in range(2, 5):
                 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as subSocket:
                     subSocket.connect((subHost[i-2], tempPort[i-2]))
                     
