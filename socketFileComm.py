@@ -5,6 +5,12 @@ def getFileData(dataDirectory, fileName):
     with open(os.path.join(dataDirectory, fileName), 'rb') as file:
         data = file.read(int(getFileSize(dataDirectory, fileName)))
         return data
+
+def getFileList(dataDirectory):
+    return [i for i in os.listdir(dataDirectory)]
+    
+def getFileCount(dataDirectory):
+    return len(getFileList(dataDirectory))
     
 def getFileSize(dataDirectory, fileName):
     fileSize = os.path.getsize(os.path.join(dataDirectory, fileName))
