@@ -42,6 +42,9 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as serverSocket:
             clientSocket.sendall(fileData)
             
             
-        #elif request == "delete":
+        elif request == "delete":
+            fileName = clientSocket.recv(512).decode()
+            
+            fileComm.deleteFile(dataDirectory, fileName)         
             
         #elif request == "update":    
